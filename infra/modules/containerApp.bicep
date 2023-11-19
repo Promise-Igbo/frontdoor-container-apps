@@ -13,7 +13,7 @@ param containerImage string
 // Define names
 var appName = '${baseName}-cont-hello-world-app'
 
-resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource ContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
   name: appName
   location: location
   properties: {
@@ -22,13 +22,37 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
       ingress: {
         external: true
         targetPort: 3000
+        allowInsecure: false
+        traffic: [
+          {
+            latestRevision: true
+            weight: 100
+          }
+        ]
       }
+      registries: [
+        {
+          server: containerRegistry.name
+          username: containerRegistry.properties.loginServer
+          passwordSecretRef: 'container-registry-password'
+        }
+      ]
+      secrets: [
+        {
+          name: 'container-registry-password'
+          value: containerRegistry.listCredentials().passwords[0].value
+        }
+      ]
     }
     template: {
       containers: [
         {
-          name: 'app'
-          image: containerImage
+          name: appName
+          image: containerImage //'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          resources: {
+            cpu: '0.5'
+            memory: '1Gi'
+          }
           probes: [
             {
               type: 'Liveness'
@@ -40,12 +64,12 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
               failureThreshold: 3
               initialDelaySeconds: 20
             }
-          ]
+          ]         
         }
       ]
       scale: {
         minReplicas: 1
-        maxReplicas: 10
+        maxReplicas: 5
       }
     }
   }

@@ -22,6 +22,14 @@ module logAnalytics './modules/logAnalytics.bicep' = {
   }
 }
 
+module containerRegistry './modules/containerRegistry.bicep' = {
+  name: 'containerreg'
+  params: {
+    location: location
+    baseName: baseName
+  }
+}
+
 module containerAppsEnv './modules/containerAppsEnv.bicep' = {
   name: 'containerapps'
   params: {
