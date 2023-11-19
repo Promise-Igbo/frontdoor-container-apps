@@ -2,7 +2,7 @@
 param containerRegistryName string
 
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-12-01-preview' = {
-  name: containerRegistryName
+  name: contReg
   location: location
   sku: {
     name: 'Basic'
